@@ -1,6 +1,6 @@
 # RepoSwarm🤖
 
-The AI-powered agentic engine that crawls all your repos daily and generates architecture documentation (see example results repo at  [repo-swarm-results-hub](https://github.com/royosherove/repo-swarm-results-hub). 
+The AI-powered agentic engine that crawls all your repos daily and generates architecture documentation (see example results repo at  [repo-swarm-sample-results-hub](https://github.com/royosherove/repo-swarm-sample-results-hub). 
 
 ## What's This For?
 
@@ -32,7 +32,7 @@ graph TB
 ```
 
 🔗 **Analysis prompts**: [prompts/shared](prompts/shared) - The AI prompts used to understand your codebases
-🏗️ **Generated docs**: [repo-swarm-results-hub](https://github.com/royosherove/repo-swarm-results-hub) - Where the `.arch.md` files end up
+🏗️ **Generated docs**: [repo-swarm-sample-results-hub](https://github.com/royosherove/repo-swarm-sample-results-hub) - Where the `.arch.md` files end up
 
 ## Quick Start
 
@@ -208,7 +208,7 @@ mise test-integration
 
 ## Related Projects
 
-- 🏗️ [**repo-swarm-results-hub**](https://github.com/royosherove/repo-swarm-results-hub) - The centralized repository where generated `.arch.md` files are stored and queried
+- 🏗️ [**repo-swarm-sample-results-hub**](https://github.com/royosherove/repo-swarm-sample-results-hub) - The centralized repository where generated `.arch.md` files are stored and queried
 - 📝 [Analysis prompts](src/prompts/shared/) - The AI prompts used to understand different types of codebases
 
 ## Understanding the Codebase
@@ -422,4 +422,4 @@ mise cleanup-temp
 
 ---
 
-*Twin project: [repo-swarm-results-hub](https://github.com/royosherove/repo-swarm-results-hub) - Query and analyze the generated architecture documentation*
+*Twin project: [repo-swarm-sample-results-hub](https://github.com/royosherove/repo-swarm-sample-results-hub) - Query and analyze the generated architecture documentation*
