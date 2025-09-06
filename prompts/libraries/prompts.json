@@ -1,0 +1,15 @@
+{
+  "extends": "../base_prompts.json",
+  "additional_prompts": [
+    {
+      "name": "api_surface",
+      "file": "api_surface.md",
+      "description": "Public API analysis and design patterns"
+    },
+    {
+      "name": "internals",
+      "file": "internals.md",
+      "description": "Internal architecture and implementation"
+    }
+  ]
+}

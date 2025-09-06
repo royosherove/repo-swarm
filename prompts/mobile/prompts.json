@@ -1,0 +1,25 @@
+{
+  "extends": "../base_prompts.json",
+  "additional_prompts": [
+    {
+      "name": "ui_and_navigation",
+      "file": "ui_and_navigation.md",
+      "description": "UI architecture and navigation patterns"
+    },
+    {
+      "name": "api_and_network",
+      "file": "api_and_network.md",
+      "description": "API integration and network communication"
+    },
+    {
+      "name": "device_features",
+      "file": "device_features.md",
+      "description": "Native device features and capabilities"
+    },
+    {
+      "name": "data_and_persistence",
+      "file": "data_and_persistence.md",
+      "description": "Data persistence and state management"
+    }
+  ]
+}

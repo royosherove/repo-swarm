@@ -1,0 +1,567 @@
+# MCP Tool Configuration - mise.toml as MCP Server
+# ===============================================
+#
+# This mise.toml file serves as a comprehensive MCP (Model Context Protocol) tool configuration.
+# Each 'task' below can be used as an MCP tool by agents for repository analysis and workflow management.
+#
+# TOOL USAGE GUIDELINES FOR AGENTS:
+# ================================
+#
+# 🔧 DEVELOPMENT SETUP:
+#   - dev-dependencies: When setting up the project or after pulling new code
+#   - dev-temporal: When starting Temporal server for local development/testing
+#   - dev-repos-update: When refreshing the repository list for analysis
+#
+# 🏃 WORKFLOW EXECUTION:
+#   - investigate-all/investigate-one: For comprehensive repository analysis (use 'investigate-one' for testing/debugging)
+#   - investigate-public/investigate-debug: For production/deployed workflow execution
+#   - dev-worker/dev-client: For manual workflow management and testing
+#
+# 🧪 TESTING & VALIDATION:
+#   - test-all/test-units/test-integration: For comprehensive testing (use 'test-units' for quick feedback during development)
+#   - test-dynamodb*: For database connectivity and functionality testing
+#   - docker-test*: For container build and deployment validation
+#
+# 🔍 MONITORING & DEBUGGING:
+#   - monitor-workflow/monitor-workflow-retry: For checking workflow execution status and progress
+#   - investigate-debug: When detailed logging is needed for investigation issues
+#   - docker-debug/docker-shell: For container troubleshooting and manual inspection
+#
+# 🧹 MAINTENANCE & CLEANUP:
+#   - cleanup-temp: When freeing disk space or resetting test environments
+#   - dev-stop: When stopping background processes and resetting development environment
+#   - deploy-secrets: When deploying to AWS and managing production secrets
+#
+# 📦 CONTAINERIZATION:
+#   - docker-dev/docker-build: For local containerized development and testing
+#   - docker-build-args: For production deployments with build metadata
+#   - investigate-production-docker/investigate-production-docker-compose: For containerized workflow execution
+#
+# DECISION FRAMEWORK FOR AGENTS:
+# =============================
+# 1. For LOCAL DEVELOPMENT: Use 'dev-temporal' + 'dev-worker' + 'investigate-all'/'investigate-one'
+# 2. For PRODUCTION: Use 'investigate-public'/'investigate-debug' with proper .env
+# 3. For TESTING: Start with 'test-units', then 'test-all', then 'test-dynamodb*' as needed
+# 4. For DEBUGGING: Use '*-debug' variants and 'monitor-workflow'/'monitor-workflow-retry' for monitoring
+# 5. For CONTAINERIZATION: Use 'docker-*' tasks matching your deployment strategy
+#
+# Each task description includes specific "Use when:" guidance for precise tool selection.
+
+[tools]
+python = "3.12"
+temporal = "latest"
+uv = "latest"
+
+[env]
+_.file = ".env"
+
+[tasks]
+# Get started wizard
+# Interactive setup wizard that creates .env.local from env.example
+# Use when: first time setup, configuring local development environment, or regenerating configuration
+get-started = "scripts/get-started.sh"
+
+# Start Temporal server
+# Launches the Temporal development server for workflow orchestration
+# Use when: setting up local development environment, starting workflows, or testing Temporal-based functionality
+dev-temporal = "temporal server start-dev"
+
+# Install Python dependencies
+# Installs all required Python packages using uv
+# Use when: initial project setup, after pulling new code, or when dependencies are missing
+dev-dependencies = "uv sync"
+
+# Run the Temporal worker
+# Starts the Temporal worker process to execute workflow activities
+# Use when: running workflows locally, testing worker functionality, or processing investigation tasks
+dev-worker = "cd src && mise exec python@3.12 -- python -m investigate_worker"
+
+# Run the workflow client
+# Executes the main client to trigger and manage workflows
+# Use when: manually triggering workflows, testing workflow initiation, or managing running workflows
+dev-client = "cd src && python -m client"
+
+# Kill all Temporal servers and workers
+# Stops all running Temporal processes and workers
+# Use when: cleaning up after testing, stopping background processes, or resetting development environment
+dev-stop = "scripts/kill.sh"
+
+# Run the complete hello world workflow
+# Executes a full hello world workflow demonstration (requires Temporal server to be running)
+# Use when: testing basic workflow functionality, verifying Temporal setup, or demonstrating the system
+dev-hello = "scripts/hello.sh"
+
+# Quick start workflow
+# Runs the main investigation workflow continuously every 6 hours (assumes Temporal server is already running)
+# Use when: running continuous repository monitoring, production-like testing, or automated investigation cycles
+production-workflow = "scripts/workflow.sh"
+
+# Run the investigate repositories workflow locally
+# Always uses .env.local for local testing configuration
+# Runs continuously every 6 hours until stopped (Ctrl+C)
+# Usage: mise investigate-all [ARGUMENTS]
+# Arguments (can be used in any order):
+#   force                 Forces investigation of all repos ignoring cache
+#   model MODEL_NAME      Override Claude model to use
+#   max-tokens NUMBER     Override max tokens (100-100000)
+#   sleep-hours NUMBER    Override hours between executions (0.01-168, supports decimals)
+#   chunk-size NUMBER     Override number of repos to process in parallel (1-20)
+#   dry-run              Show what would be executed without running
+#   h                    Show help message
+# Examples:
+#   mise investigate-all                              # Default settings
+#   mise investigate-all force                        # Force investigation
+#   mise investigate-all chunk-size 4                 # Process 4 repos in parallel
+#   mise investigate-all force sleep-hours 12 chunk-size 10  # Force with custom settings
+#   mise investigate-all dry-run model claude-3-haiku-20241022  # Test configuration
+# Use when: bulk repository analysis, testing multiple repos locally, or development workflow testing
+investigate-all = "scripts/full.sh"
+
+# Run single repository investigation locally for testing
+# Always uses .env.local for local testing configuration
+# Default repository is "is-odd" if not specified
+# Usage: mise investigate-one [REPO_NAME_OR_URL] [ARGUMENTS]
+# Repository can be:
+#   - A name from repos.json (e.g., is-odd, is-even)
+#   - A direct GitHub URL
+#   - Omitted (defaults to is-odd)
+# Arguments (can be used in any order):
+#   force                 Forces investigation ignoring cache
+#   model MODEL_NAME      Override Claude model to use
+#   max-tokens NUMBER     Override max tokens (100-100000)
+#   type TYPE             Override repository type
+#   dry-run              Show what would be executed without running
+#   h, help              Show help message
+# Examples:
+#   mise investigate-one                                    # Investigate is-odd repository
+#   mise investigate-one is-even                             # Investigate is-even repository
+#   mise investigate-one force                              # Force investigation of is-odd
+#   mise investigate-one is-odd force model claude-3-haiku-20241022
+#   mise investigate-one https://github.com/user/repo type libraries
+# Use when: testing specific repositories, debugging analysis issues, or quick repository evaluation
+investigate-one = "scripts/single.sh $@"
+
+# Investigate a public repository using Claude Investigator
+# Runs repository analysis on a public GitHub repository
+# Use when: analyzing public repos without local setup, quick repository assessment, or external repository evaluation
+investigate-public = "scripts/repo.sh"
+
+# Investigate a public repository with DEBUG logging
+# Runs repository analysis with detailed debug output for troubleshooting
+# Use when: debugging repository analysis issues, investigating analysis failures, or detailed logging is needed
+investigate-debug = "scripts/repo-debug.sh"
+
+# Clean up the temp folder and all investigated repositories
+# Removes all temporary files and cached repository data
+# Use when: freeing disk space, resetting test environment, or cleaning up after investigation runs
+cleanup-temp = "scripts/clean.sh"
+
+# Test both unit and integration tests
+# Runs the complete test suite including unit and integration tests
+# Use when: comprehensive testing before commits, CI/CD pipelines, or verifying overall system health
+test-all = { depends = ["test-units", "test-integration"] }
+
+# Run unit tests only
+# Executes all unit tests in the tests/unit directory with verbose output
+# Use when: quick feedback on code changes, isolated testing of components, or during active development
+test-units = """
+    echo "🧪 Running unit tests..." && \
+    mise exec python@3.12 -- python -m pytest tests/unit -v --tb=short
+"""
+
+# Run integration tests
+# Executes integration tests in the tests/integration directory, excluding slow tests
+# Use when: testing component interactions, verifying system integration, or before deployments
+test-integration = """
+    echo "🔗 Running integration tests..." && \
+    mise exec python@3.12 -- python -m pytest tests/integration -v --tb=short -m "not slow"
+"""
+
+# Run all tests (unit + integration)
+# Executes the complete test suite with all unit and integration tests
+# Use when: comprehensive validation, pre-release testing, or investigating test failures across the entire suite
+test-complete = """
+    echo "🧪 Running all tests (unit + integration)..." && \
+    mise exec python@3.12 -- python -m pytest tests/ -v --tb=short
+"""
+
+# List available repositories for testing
+# Displays all configured repositories available for investigation
+# Use when: exploring available test repositories, planning investigation runs, or verifying repository configuration
+dev-repos-list = "scripts/list.sh"
+
+# Update repos.json with the top 50 last updated repositories from configured GitHub organization
+# Fetches the latest repositories and automatically detects their types
+# Usage: mise dev-repos-update
+# Use when: refreshing repository list, adding new repositories to analysis, or keeping repository data current
+dev-repos-update = """
+    echo "🔄 Updating repos.json with latest repositories..." && \
+    mise exec python@3.12 -- python scripts/update_repos.py && \
+    echo "✨ Repository list updated successfully!"
+"""
+
+
+# Build Docker image only (no cache)
+# Builds the Docker image without using cache for clean builds
+# Use when: ensuring reproducible builds, testing Docker configuration, or after major changes
+docker-build = "docker build --no-cache -t repo-swarm:local ."
+
+# Run Docker container with current environment variables
+# Starts the Docker container with environment variables loaded from .env file
+# Use when: testing containerized deployment, verifying environment configuration, or isolated execution
+docker-run = "docker run --rm -it --env-file .env repo-swarm:local"
+
+# Build and run Docker container locally
+# Builds and runs the Docker container with conditional caching (pass 'clean' to force rebuild without cache)
+# Use when: local containerized development, testing Docker workflow, or deployment simulation
+docker-dev = """
+    if [[ "$1" == "clean" ]]; then
+        echo "🧹 Removing existing image and building without cache..."
+        docker rmi repo-swarm:local 2>/dev/null || true
+        docker build --no-cache --pull -t repo-swarm:local .
+    else
+        echo "🏗️  Building Docker image (using cache if available)..."
+        docker build -t repo-swarm:local .
+    fi && \
+    echo "🚀 Running Docker container..." && \
+    docker run --rm -it --env-file .env repo-swarm:local
+"""
+
+# Build and run with verbose output for debugging
+# Builds and runs Docker container with debug logging and unbuffered Python output for troubleshooting
+# Use when: investigating container issues, debugging application startup, or analyzing runtime problems
+docker-debug = """
+    docker build --no-cache -t repo-swarm:debug . && \
+    docker run --rm -it \
+        --env-file .env \
+        --env PYTHONUNBUFFERED=1 \
+        --env LOG_LEVEL=DEBUG \
+        repo-swarm:debug
+"""
+
+# Test Docker container startup without full worker (no cache - clean build)
+# Builds and tests basic Docker container functionality including mise installation and Python imports
+# Use when: verifying Docker build process, testing basic container functionality, or CI/CD validation
+docker-test-build = """
+    docker build --no-cache -t repo-swarm:test . && \
+    docker run --rm \
+        --entrypoint /bin/bash \
+        repo-swarm:test \
+        -c 'echo "Testing mise installation..." && /home/app/.local/bin/mise --version && echo "Testing Python..." && python --version && echo "Activating mise environment..." && eval "$(/home/app/.local/bin/mise activate bash)" && echo "Testing imports..." && cd /app/src && python -c "import investigate_worker; print(\\\"Imports successful!\\\")"'
+"""
+
+# Test Docker container startup with build cache (faster for development)
+# Builds and tests basic Docker container functionality using Docker cache
+# Use when: quick testing during development when Dockerfile changes are minimal
+docker-test-cached = """
+    docker build -t repo-swarm:test . && \
+    docker run --rm \
+        --entrypoint /bin/bash \
+        repo-swarm:test \
+        -c 'echo "Testing mise installation..." && /home/app/.local/bin/mise --version && echo "Testing Python..." && python --version && echo "Activating mise environment..." && eval "$(/home/app/.local/bin/mise activate bash)" && echo "Testing imports..." && cd /app/src && python -c "import investigate_worker; print(\\\"Imports successful!\\\")"'
+"""
+
+# Test Docker with mock Temporal (no cache - clean build)
+# Builds and tests Docker container with mock Temporal server configuration for development testing
+# Use when: testing worker startup in container, verifying Temporal integration, or development environment validation
+docker-test-temporal = """
+    docker build --no-cache -t repo-swarm:test . && \
+    docker run --rm \
+        --env TEMPORAL_SERVER_URL=localhost:7233 \
+        --env TEMPORAL_NAMESPACE=default \
+        --env TEMPORAL_TASK_QUEUE=test-queue \
+        --env TEMPORAL_IDENTITY=test-worker \
+        --env TEMPORAL_API_KEY= \
+        --entrypoint /bin/bash \
+        repo-swarm:test \
+        -c 'echo "Activating mise environment..." && eval "$(/home/app/.local/bin/mise activate bash)" && echo "Testing worker startup (will fail on connection but should show logs)..." && cd /app/src && timeout 10 python -m investigate_worker || echo "Expected timeout/connection failure"'
+"""
+
+# Test Docker with mock Temporal (cached build - faster for development)
+# Builds and tests Docker container with mock Temporal server configuration using cache
+# Use when: quick testing during development when changes are minimal
+docker-test-temporal-mock-cached = """
+    docker build -t repo-swarm:test . && \
+    docker run --rm \
+        --env TEMPORAL_SERVER_URL=host.docker.internal:7233 \
+        --env TEMPORAL_NAMESPACE=default \
+        --env TEMPORAL_TASK_QUEUE=test-queue \
+        --env TEMPORAL_IDENTITY=test-worker \
+        --env TEMPORAL_API_KEY= \
+        --env LOCAL_TESTING=false \
+        --entrypoint /bin/bash \
+        repo-swarm:test \
+        -c 'echo "Activating mise environment..." && eval "$(/home/app/.local/bin/mise activate bash)" && export TEMPORAL_SERVER_URL=host.docker.internal:7233 && export LOCAL_TESTING=false && echo "Testing worker startup..." && cd /app/src && timeout 10 python -m investigate_worker || echo "Worker started successfully - timeout expected"'
+"""
+
+# Run Docker container with shell for debugging
+# Builds and runs Docker container with interactive shell for manual debugging and testing
+# Use when: interactive container debugging, manual testing of containerized application, or exploring container filesystem
+docker-shell = """
+    docker build --no-cache -t repo-swarm:debug . && \
+    docker run --rm -it \
+        --env-file .env \
+        --entrypoint /bin/bash \
+        repo-swarm:debug
+"""
+
+# Build and run Docker container with environment variables
+# Builds and runs Docker container using env.example file for environment configuration
+# Use when: testing with example configuration, verifying default settings, or template-based deployment
+docker-env = "docker build --no-cache -t repo-swarm . && docker run --rm -it --network host --env-file env.example repo-swarm"
+
+# Build with arguments and run with environment variables
+# Builds Docker image with GitHub token, build environment, and git commit as build args, then runs with env.example
+# Use when: CI/CD builds with metadata, production deployments, or version-tracked container builds
+docker-build-args = "docker build --no-cache --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} --build-arg BUILD_ENV=staging --build-arg GIT_COMMIT=$(git rev-parse HEAD) -t repo-swarm . && docker run --rm -it --env-file env.example repo-swarm"
+
+# Set SSM parameters from .env file
+# Uploads environment variables from .env file to AWS Systems Manager Parameter Store
+# Use when: deploying to AWS, managing production secrets, or configuring cloud infrastructure
+deploy-secrets = "scripts/secretset.sh"
+
+# Debug Temporal server connection
+# Checks if Temporal server is running and accessible on localhost:7233
+# Use when: debugging connection issues between Docker containers and Temporal server
+monitor-temporal = """
+    echo "🔍 Checking Temporal server status..." && \
+    if lsof -i :7233 > /dev/null 2>&1; then
+        echo "✅ Temporal server is running on port 7233" && \
+        echo "📊 Connection details:" && \
+        lsof -i :7233 | head -2
+    else
+        echo "❌ Temporal server is NOT running on port 7233" && \
+        echo "💡 Try running: mise dev-temporal"
+    fi
+"""
+
+# Test Docker-Temporal networking
+# Tests if Docker containers can connect to host Temporal server using different networking modes
+# Use when: debugging Docker networking issues with Temporal server connectivity
+debug-docker-network = """
+    echo "🐳 Testing Docker networking with Temporal server..." && \
+    echo "Testing with --network host:" && \
+    docker run --rm --network host alpine sh -c "
+        apk add --no-cache curl >/dev/null 2>&1 && \
+        if curl -f http://localhost:7233 >/dev/null 2>&1; then
+            echo '✅ Host networking works'
+        else
+            echo '❌ Host networking failed'
+        fi
+    " 2>/dev/null && \
+    echo "Testing with host.docker.internal:" && \
+    docker run --rm alpine sh -c "
+        apk add --no-cache curl >/dev/null 2>&1 && \
+        if curl -f http://host.docker.internal:7233 >/dev/null 2>&1; then
+            echo '✅ host.docker.internal works'
+        else
+            echo '❌ host.docker.internal failed'
+        fi
+    " 2>/dev/null
+"""
+
+# Quick Docker Temporal test (no cache - clean build)
+# Builds and runs a minimal test to verify Docker can connect to Temporal server
+# Use when: quick verification that Docker-Temporal setup is working
+docker-test-temporal-quick = """
+    echo "Testing Docker-Temporal connection..." && \
+    docker build --no-cache -t repo-swarm:test . && \
+    docker run --rm --network host \
+        --env-file env.example \
+        --entrypoint /bin/bash \
+        repo-swarm:test \
+        -c 'cd src && timeout 10 python -c "
+import asyncio
+from temporalio.client import Client
+async def test():
+    try:
+        client = await Client.connect(\"localhost:7233\")
+        await client.close()
+        print(\"SUCCESS: Docker can connect to Temporal!\")
+        return True
+    except Exception as e:
+        print(f\"FAILED: {e}\")
+        return False
+result = asyncio.run(test())
+" 2>&1 | grep -E "(SUCCESS|FAILED)" || echo "Test completed - check output above"'
+"""
+
+# Quick Docker Temporal test (cached build - faster for development)
+# Builds and runs a minimal test to verify Docker can connect to Temporal server using cache
+# Use when: quick verification during development when changes are minimal
+docker-test-temporal-cached = """
+    echo "Testing Docker-Temporal connection..." && \
+    docker build -t repo-swarm:test . && \
+    docker run --rm \
+        --env-file env.example \
+        --entrypoint /bin/bash \
+        repo-swarm:test \
+        -c 'cd src && timeout 10 python -c "
+import asyncio
+from temporalio.client import Client
+async def test():
+    try:
+        client = await Client.connect(\"host.docker.internal:7233\")
+        print(\"SUCCESS: Docker can connect to Temporal!\")
+        return True
+    except Exception as e:
+        print(f\"FAILED: {e}\")
+        return False
+result = asyncio.run(test())
+" 2>&1 | grep -E "(SUCCESS|FAILED)" || echo "Test completed - check output above"'
+"""
+
+# Query workflow status
+# Usage: mise monitor-workflow <workflow_id> [query_type] [repo_name]
+# Examples:
+#   mise monitor-workflow investigate-repos-workflow                    # Overall workflow status
+#   mise monitor-workflow investigate-repos-workflow all_repo_statuses  # All repo statuses
+#   mise monitor-workflow investigate-repos-workflow repo_status is-odd # Specific repo status
+#   mise monitor-workflow investigate-single-repo-is-odd               # Child workflow status
+# Use when: monitoring running workflows, debugging workflow issues, or checking investigation progress
+monitor-workflow = "cd src && python query_workflow_status.py $1 $2 $3"
+
+# Query the Temporal workflow's get_status via CLI with automatic retry
+# Usage: mise monitor-workflow-retry <workflow_id>
+# Handles workflow cache warmup by retrying if first attempt times out
+# Use when: reliable workflow monitoring, automated status checking, or CI/CD pipeline integration
+monitor-workflow-retry = "scripts/query-status-retry.sh $1"
+
+# Run the investigate repositories workflow using Docker container
+# This runs like 'mise investigate-all' but executes the worker in a Docker container
+# Starts Temporal server on host, runs worker in Docker, triggers with client
+# Usage: mise investigate-production [ARGUMENTS]
+# Arguments (can be used in any order):
+#   force                 Forces investigation of all repos ignoring cache
+#   model MODEL_NAME      Override Claude model to use
+#   max-tokens NUMBER     Override max tokens (100-100000)
+#   sleep-hours NUMBER    Override hours between executions (0.01-168, supports decimals)
+#   chunk-size NUMBER     Override number of repos to process in parallel (1-20)
+#   dry-run              Show what would be executed without running
+#   h                    Show help message
+# Examples:
+#   mise investigate-production                              # Default settings
+#   mise investigate-production force                        # Force investigation
+#   mise investigate-production chunk-size 4                 # Process 4 repos in parallel
+#   mise investigate-production force sleep-hours 12 chunk-size 10  # Force with custom settings
+#   mise investigate-production dry-run model claude-3-haiku-20241022  # Test configuration
+# Use when: production deployment testing, scheduled repository monitoring, or cloud-based investigation runs
+investigate-production = "scripts/investigate.sh $@"
+
+# Investigate a single repository using Claude Investigator
+# Usage: mise investigate-production-one REPO_NAME_OR_URL [ARGUMENTS]
+# Repository Argument:
+#   REPO_NAME_OR_URL      Repository name from repos.json or direct GitHub URL (required)
+# Arguments (can be used in any order):
+#   force                 Forces investigation ignoring cache
+#   model MODEL_NAME      Override Claude model to use
+#   max-tokens NUMBER     Override max tokens (100-100000)
+#   type TYPE             Override repository type (generic, backend, frontend, mobile, infra-as-code, libraries)
+#   dry-run              Show what would be executed without running
+#   h                    Show help message
+# Examples:
+#   mise investigate-production-one is-odd                           # Investigate 'is-odd' from repos.json
+#   mise investigate-production-one https://github.com/user/repo    # Investigate direct URL
+#   mise investigate-production-one is-odd force                     # Force investigation
+#   mise investigate-production-one is-odd model claude-3-opus-20240229 max-tokens 8000
+#   mise investigate-production-one is-odd type libraries              # Override repository type
+#   mise investigate-production-one is-odd dry-run force model claude-3-haiku-20241022
+# Use when: targeted repository analysis in production, specific repo investigation, or cloud-based single repository testing
+investigate-production-one = "scripts/investigate-single.sh $@"
+
+# Test DynamoDB functionality locally
+# Usage: mise test-dynamodb [--real-aws] [--table-name NAME]
+# Examples:
+#   mise test-dynamodb                                    # Mock testing (default)
+#   mise test-dynamodb --real-aws                         # Real AWS testing (recommended)
+#   mise test-dynamodb --real-aws --table-name dev-test   # Custom table name
+# Use when: developing with DynamoDB, testing database operations, or verifying local AWS configuration
+test-dynamodb = """
+    echo "🧪 Testing DynamoDB functionality..." && \
+    uv sync --extra dev 2>/dev/null || echo "Dependencies already installed" && \
+    mise exec python@3.12 -- python test_dynamodb_local.py $@
+"""
+
+# Test DynamoDB with real AWS (shortcut for common use case)
+# This verifies AWS credentials and DynamoDB connectivity
+# Use when: validating production AWS setup, testing real cloud connectivity, or verifying deployment credentials
+test-dynamodb-aws = """
+    echo "🧪 Testing DynamoDB with real AWS credentials..." && \
+    mise exec python@3.12 -- python test_dynamodb_local.py --real-aws --table-name dev-repo-swarm-results
+"""
+
+# Integration test using real DynamoDB table with investigator components
+# This tests the complete end-to-end flow with actual staging table
+# Use when: comprehensive system testing, verifying investigator-DynamoDB integration, or pre-deployment validation
+test-dynamodb-integration = """
+    echo "🧪 Running DynamoDB integration test with investigator components..." && \
+    uv sync 2>/dev/null || echo "Dependencies already installed" && \
+    mise exec python@3.12 -- python test_dynamodb_integration.py
+"""
+
+# Test workflow caching logic
+# Verifies that DynamoDB metadata is saved only after successful investigation
+# Use when: testing caching mechanisms, debugging persistence issues, or verifying workflow state management
+test-workflow-cache = """
+    echo "🧪 Testing workflow caching logic..." && \
+    mise exec python@3.12 -- python test_workflow_cache_simple.py
+"""
+
+# Test DynamoDB health check
+# Verifies the health check that runs at the start of each workflow
+# Use when: monitoring system health, debugging connectivity issues, or validating database availability
+test-health-check = """
+    echo "🧪 Testing DynamoDB health check..." && \
+    mise exec python@3.12 -- python test_health_check.py
+"""
+
+# Run the investigate repositories workflow using Docker container
+# This runs like 'mise investigate-all' but executes the worker in a Docker container
+# Starts Temporal server on host, runs worker in Docker, triggers with client
+# Usage: mise investigate-production-docker [ARGUMENTS]
+# Arguments (can be used in any order):
+#   force                 Forces investigation of all repos ignoring cache
+#   model MODEL_NAME      Override Claude model to use
+#   max-tokens NUMBER     Override max tokens (100-100000)
+#   sleep-hours NUMBER    Override hours between executions (0.01-168, supports decimals)
+#   chunk-size NUMBER     Override number of repos to process in parallel (1-20)
+#   dry-run              Show what would be executed without running
+#   h                    Show help message
+# Examples:
+#   mise investigate-production-docker                              # Default settings
+#   mise investigate-production-docker force                        # Force investigation
+#   mise investigate-production-docker chunk-size 4                 # Process 4 repos in parallel
+#   mise investigate-production-docker force sleep-hours 12 chunk-size 10  # Force with custom settings
+#   mise investigate-production-docker dry-run model claude-3-haiku-20241022  # Test configuration
+# Use when: testing containerized workflows, simulating production deployment, or Docker-based development
+investigate-production-docker = "scripts/full-docker.sh $@"
+
+# Alternative version using docker-compose
+# Run the investigate repositories workflow using Docker Compose
+# This runs like 'mise investigate-all' but executes the worker in a Docker container
+# Starts Temporal server on host, runs worker in Docker, triggers with client
+# Usage: mise investigate-production-docker-compose [ARGUMENTS]
+# Arguments are the same as investigate-production-docker
+# Use when: complex multi-container testing, production-like environment simulation, or docker-compose based deployments
+investigate-production-docker-compose = """
+    echo "🐳 Starting investigation workflow with Docker Compose..." && \
+    echo "Starting Temporal server..." && \
+    mise run dev-temporal & \
+    SERVER_PID=$$! && \
+    sleep 5 && \
+    docker-compose run --rm repo-swarm-full /bin/bash -c "
+        echo '📦 Installing Python dependencies...' && \
+        uv sync && \
+        echo '🔧 Starting worker process...' && \
+        cd src && python -m investigate_worker &
+        WORKER_PID=$$$$! && \
+        sleep 2 && \
+        echo '🎯 Starting investigation workflow...' && \
+        cd src && python -m client investigate $$$$@ && \
+        echo '🛑 Stopping worker...' && \
+        kill $$$$WORKER_PID
+    " -- "$$@" && \
+    echo "🛑 Stopping Temporal server..." && \
+    kill $$SERVER_PID && \
+    echo "✅ Docker Compose investigation workflow completed!"
+"""

@@ -1,0 +1,15 @@
+{
+  "extends": "../base_prompts.json",
+  "additional_prompts": [
+    {
+      "name": "resources",
+      "file": "resources.md",
+      "description": "Detailed analysis of infrastructure resources"
+    },
+    {
+      "name": "environments",
+      "file": "environments.md",
+      "description": "Environment management and deployment strategies"
+    }
+  ]
+}

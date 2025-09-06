@@ -1,0 +1,248 @@
+{
+  "description": "Configuration for selecting appropriate prompt set based on repository type",
+  "repository_types": [
+    {
+      "type": "infra-as-code",
+      "prompt_dir": "infra-as-code",
+      "description": "Infrastructure as Code projects (Terraform, CloudFormation, Ansible, Helm)",
+      "detection_patterns": {
+        "files": [
+          "*.tf",
+          "*.tfvars", 
+          "terraform.tfstate",
+          "ansible.cfg",
+          "playbook*.yml",
+          "Chart.yaml",
+          "values.yaml",
+          "*.cfn.json",
+          "*.cfn.yaml",
+          "template.yaml",
+          "serverless.yml",
+          "atlantis.yaml",
+          ".gitlab-ci.yml",
+          "Jenkinsfile"
+        ],
+        "directories": [
+          "terraform/",
+          "ansible/",
+          "helm/",
+          "charts/",
+          "cloudformation/",
+          "infrastructure/",
+          "deployments/",
+          "k8s/",
+          "kubernetes/"
+        ],
+        "keywords": [
+          "terraform",
+          "provider",
+          "resource",
+          "module",
+          "ansible",
+          "playbook",
+          "kubernetes",
+          "helm",
+          "infrastructure"
+        ]
+      }
+    },
+    {
+      "type": "frontend",
+      "prompt_dir": "frontend",
+      "description": "Frontend applications (React, Vue, Angular, etc.)",
+      "detection_patterns": {
+        "files": [
+          "package.json",
+          "index.html",
+          "*.jsx",
+          "*.tsx",
+          "*.vue",
+          "angular.json",
+          "webpack.config.js",
+          "vite.config.js",
+          ".eslintrc.js",
+          "tsconfig.json"
+        ],
+        "directories": [
+          "src/components/",
+          "src/pages/",
+          "src/views/",
+          "src/app/",
+          "public/",
+          "assets/",
+          "styles/",
+          "css/"
+        ],
+        "dependencies": [
+          "react",
+          "vue",
+          "angular",
+          "svelte",
+          "next",
+          "nuxt",
+          "gatsby",
+          "webpack",
+          "vite",
+          "@angular/core"
+        ],
+        "keywords": [
+          "component",
+          "useState",
+          "useEffect",
+          "render",
+          "props",
+          "jsx",
+          "tsx",
+          "frontend",
+          "ui"
+        ]
+      }
+    },
+    {
+      "type": "backend",
+      "prompt_dir": "backend",
+      "description": "Backend services and APIs (Python/Rails)",
+      "detection_patterns": {
+        "files": [
+          "requirements.txt",
+          "setup.py",
+          "pyproject.toml",
+          "Pipfile",
+          "poetry.lock",
+          "Gemfile",
+          "Gemfile.lock",
+          "Rakefile",
+          "config.ru",
+          "*.py",
+          "*.rb",
+          "manage.py",
+          "wsgi.py",
+          "asgi.py",
+          "application.rb",
+          "routes.rb"
+        ],
+        "directories": [
+          "app/",
+          "api/",
+          "controllers/",
+          "models/",
+          "services/",
+          "views/",
+          "serializers/",
+          "db/",
+          "config/",
+          "lib/",
+          "spec/",
+          "test/",
+          "tests/",
+          "migrations/",
+          "workers/",
+          "workflows/",
+          "activities/",
+          "jobs/",
+          "mailers/"
+        ],
+        "dependencies": [
+          "django",
+          "flask",
+          "fastapi",
+          "celery",
+          "sqlalchemy",
+          "pandas",
+          "numpy",
+          "requests",
+          "boto3",
+          "rails",
+          "sinatra",
+          "resque",
+          "sidekiq",
+          "activerecord",
+          "puma",
+          "unicorn"
+        ],
+        "keywords": [
+          "api",
+          "endpoint",
+          "route",
+          "controller",
+          "service",
+          "model",
+          "view",
+          "serializer",
+          "migration",
+          "activerecord",
+          "django",
+          "flask",
+          "fastapi",
+          "rails",
+          "rest",
+          "graphql",
+          "celery",
+          "sidekiq",
+          "orm"
+        ]
+      }
+    },
+    {
+      "type": "libraries",
+      "prompt_dir": "libraries",
+      "description": "Libraries, SDKs, and packages",
+      "detection_patterns": {
+        "files": [
+          "setup.py",
+          "setup.cfg",
+          "pyproject.toml",
+          "package.json",
+          "tsconfig.json",
+          "rollup.config.js",
+          "webpack.config.js",
+          ".npmignore",
+          "LICENSE",
+          "*.d.ts"
+        ],
+        "directories": [
+          "lib/",
+          "src/",
+          "dist/",
+          "build/",
+          "examples/",
+          "docs/",
+          "types/"
+        ],
+        "package_indicators": {
+          "npm": ["main", "module", "types", "exports"],
+          "python": ["packages", "py_modules"],
+          "java": ["groupId", "artifactId"]
+        },
+        "keywords": [
+          "library",
+          "sdk",
+          "package",
+          "module",
+          "export",
+          "public api",
+          "dist",
+          "bundle"
+        ]
+      }
+    },
+    {
+      "type": "generic",
+      "prompt_dir": "generic",
+      "description": "Generic repository analysis (fallback)",
+      "detection_patterns": {
+        "default": true
+      }
+    }
+  ],
+  "detection_strategy": {
+    "priority_order": ["infra-as-code", "libraries", "frontend", "backend", "generic"],
+    "min_confidence_score": 0.15,
+    "scoring_weights": {
+      "files": 0.5,
+      "directories": 0.3,
+      "dependencies": 0.15,
+      "keywords": 0.05
+    }
+  }
+}

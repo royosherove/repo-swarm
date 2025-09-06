@@ -1,0 +1,26 @@
+{
+  "default": "https://github.com/ascpixi/is-odd",
+  "_comment": "Available types: generic, backend, frontend, mobile, infra-as-code, libraries",
+  "repositories": {
+    "is-even": {
+      "url": "https://github.com/samuelmarina/is-even",
+      "description": "Check if a number is even",
+      "type": "generic"
+    },
+    "is-odd": {
+      "url": "https://github.com/ascpixi/is-odd",
+      "description": "A JavaScript library that determines if a number is odd or even",
+      "type": "libraries"
+    },
+    "is": {
+      "url": "https://github.com/sindresorhus/is",
+      "description": "A TypeScript library for type checking values",
+      "type": "libraries"
+    },
+    "open": {
+      "url": "https://github.com/sindresorhus/open",
+      "description": "A Node.js package to open stuff like URLs, files, and executables cross-platform",
+      "type": "libraries"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+[project]
+name = "repo-swarm"
+version = "0.1.0"
+description = "Repository analysis and investigation system using Claude and Temporal"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "temporalio>=1.15.0",
+    "anthropic>=0.18.0",
+    "gitpython>=3.1.0",
+    "requests>=2.31.0",
+    "boto3>=1.34.0",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=0.24.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "moto[dynamodb]",
+    "boto3",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.uv]
+dev-dependencies = [
+    "moto[dynamodb]",
+    "boto3",
+]

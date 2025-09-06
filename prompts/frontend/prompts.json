@@ -1,0 +1,15 @@
+{
+  "extends": "../base_prompts.json",
+  "additional_prompts": [
+    {
+      "name": "components",
+      "file": "components.md",
+      "description": "Component architecture and design patterns"
+    },
+    {
+      "name": "state_and_data",
+      "file": "state_and_data.md",
+      "description": "State management and data flow patterns"
+    }
+  ]
+}

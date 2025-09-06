@@ -1,0 +1,15 @@
+{
+  "extends": "../base_prompts.json",
+  "additional_prompts": [
+    {
+      "name": "data_layer",
+      "file": "data_layer.md",
+      "description": "Data persistence and access patterns"
+    },
+    {
+      "name": "events_and_messaging",
+      "file": "events_and_messaging.md",
+      "description": "Asynchronous communication and event patterns"
+    }
+  ]
+}

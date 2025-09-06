@@ -1,0 +1,114 @@
+{
+  "processing_order": [
+    {
+      "name": "hl_overview",
+      "file": "../shared/hl_overview.md",
+      "description": "High level overview of the codebase"
+    },
+    {
+      "name": "module_deep_dive",
+      "file": "../shared/module_deep_dive.md",
+      "description": "Deep dive into modules",
+      "context": [
+        {"type": "step", "val": "hl_overview"}
+      ]
+    },
+    {
+      "name": "dependencies",
+      "file": "../shared/dependencies.md",
+      "description": "Analyze dependencies and external libraries",
+      "context": [
+        {"type": "step", "val": "hl_overview"}
+      ]
+    },
+    {
+      "name": "core_entities",
+      "file": "../shared/core_entities.md",
+      "description": "Core entities and their relationships"
+    },
+    {
+      "name": "DBs",
+      "file": "../shared/db.md",
+      "description": "databases analysis"
+    },
+    {
+      "name": "APIs",
+      "file": "../shared/apis.md",
+      "description": "APIs analysis"
+    },
+    {
+      "name": "events",
+      "file": "../shared/events.md",
+      "description": "events analysis"
+    },
+    {
+      "name": "service_dependencies",
+      "file": "../shared/service_dependencies.md",
+      "description": "Analyze service dependencies",
+      "context": [
+        {"type": "step", "val": "hl_overview"},
+        {"type": "step", "val": "APIs"},
+        {"type": "step", "val": "events"}
+      ]
+    },
+    {
+      "name": "deployment",
+      "file": "../shared/deployment.md",
+      "description": "Analyze deployment processes and CI/CD pipelines",
+      "context": [
+        {"type": "step", "val": "hl_overview"},
+        {"type": "step", "val": "dependencies"}
+      ]
+    },
+    {
+      "name": "authentication",
+      "file": "../shared/authentication.md",
+      "description": "Authentication mechanisms analysis"
+    },
+    {
+      "name": "authorization",
+      "file": "../shared/authorization.md",
+      "description": "Authorization and access control analysis"
+    },
+    {
+      "name": "data_mapping",
+      "file": "../shared/data_mapping.md",
+      "description": "Data flow and personal information mapping"
+    },
+    {
+      "name": "security_check",
+      "file": "../shared/security_check.md",
+      "description": "Top 10 security vulnerabilities assessment"
+    },
+    {
+      "name": "monitoring",
+      "file": "../shared/monitoring.md",
+      "description": "Monitoring, logging, metrics, and observability analysis"
+    },
+    {
+      "name": "ml_services",
+      "file": "../shared/ml_services.md",
+      "description": "3rd party ML services and technologies analysis",
+      "context": [
+        {"type": "step", "val": "hl_overview"}
+      ]
+    },
+    {
+      "name": "feature_flags",
+      "file": "../shared/feature_flags.md",
+      "description": "Feature flag frameworks and usage patterns analysis",
+      "context": [
+        {"type": "step", "val": "hl_overview"}
+      ]
+    },
+    {
+      "name": "prompt_security_check",
+      "file": "../shared/prompt_security_check.md",
+      "description": "LLM and prompt injection vulnerability assessment",
+      "context": [
+        {"type": "step", "val": "hl_overview"},
+        {"type": "step", "val": "ml_services"}
+      ]
+    }
+  ]
+}

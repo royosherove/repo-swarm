@@ -1,0 +1,201 @@
+src/prompts/skip_repos.json
+.env*
+src/investigator/temp/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Temporal.io
+temporal/
+.temporal/
+temporal-server/
+temporal-cli/
+temporal-web/
+temporal-sdk/
+temporal-testing/
+temporal-samples/
+temporal-docs/
+temporal-ui/
+temporal-cluster/
+temporal-namespace/
+temporal-workflow/
+temporal-activity/
+temporal-task-queue/
+temporal-history/
+temporal-visibility/
+temporal-persistence/
+temporal-replication/
+temporal-matching/
+temporal-frontend/
+temporal-worker/
+temporal-client/
+temporal-server-config.yaml
+temporal-server-config.yml
+temporal-cluster-config.yaml
+temporal-cluster-config.yml
+temporal-namespace-config.yaml
+temporal-namespace-config.yml
+temporal-workflow-config.yaml
+temporal-workflow-config.yml
+temporal-activity-config.yaml
+temporal-activity-config.yml
+temporal-task-queue-config.yaml
+temporal-task-queue-config.yml
+temporal-history-config.yaml
+temporal-history-config.yml
+temporal-visibility-config.yaml
+temporal-visibility-config.yml
+temporal-persistence-config.yaml
+temporal-persistence-config.yml
+temporal-replication-config.yaml
+temporal-replication-config.yml
+temporal-matching-config.yaml
+temporal-matching-config.yml
+temporal-frontend-config.yaml
+temporal-frontend-config.yml
+temporal-worker-config.yaml
+temporal-worker-config.yml
+temporal-client-config.yaml
+temporal-client-config.yml
+**/.DS_Store
+temp/
+
+# Graph analysis files
+src/investigator/graph/arch_files/
+src/investigator/graph/graph_json/
