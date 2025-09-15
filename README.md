@@ -1,6 +1,10 @@
 # RepoSwarm🤖
+![RepoSwarm](Reposwarm-small.png)
 
-The AI-powered agentic engine that crawls all your repos daily and generates architecture documentation (see example results repo at  [repo-swarm-sample-results-hub](https://github.com/royosherove/repo-swarm-sample-results-hub). 
+
+RepoSwarm is an AI powered multi-repo architecture discovery platform that generates its output in a specialized output repository that you can use for agent context.
+
+see example results repo at  [repo-swarm-sample-results-hub](https://github.com/royosherove/repo-swarm-sample-results-hub). 
 
 ## What's This For?
 
