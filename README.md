@@ -423,3 +423,9 @@ mise cleanup-temp
 ---
 
 *Twin project: [repo-swarm-sample-results-hub](https://github.com/royosherove/repo-swarm-sample-results-hub) - Query and analyze the generated architecture documentation*
+
+
+# License
+This project is licensed under the Polyform Noncommercial License 1.0.0.
+You may use, copy, and modify the code for non-commercial purposes only.
+For commercial licensing, please contact roy at osherove dot_com.
