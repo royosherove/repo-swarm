@@ -6,7 +6,7 @@ ensuring consistent data structures across the workflow system.
 """
 
 from typing import Optional, Dict, Any, List
-from pydantic import BaseModel, Field, validator, HttpUrl
+from pydantic import BaseModel, Field, validator, HttpUrl, ConfigDict
 from datetime import datetime
 
 
@@ -302,6 +302,8 @@ class AnalysisSummary(BaseModel):
 
 class RepositoryAnalysis(BaseModel):
     """Complete repository analysis result."""
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    
     repo_name: str = Field(..., description="Name of the repository")
     repo_url: str = Field(..., description="URL of the repository")
     repo_type: str = Field(..., description="Detected repository type")
