@@ -1,5 +1,5 @@
 # RepoSwarm🤖
-![RepoSwarm](Reposwarm-small.png)
+![RepoSwarm](RepoSwarm1.jpg)
 
 
 RepoSwarm is an AI powered multi-repo architecture discovery platform that generates its output in a specialized output repository that you can use for agent context.
