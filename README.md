@@ -6,6 +6,9 @@ RepoSwarm is an AI powered multi-repo architecture discovery platform that gener
 
 see example results repo at  [repo-swarm-sample-results-hub](https://github.com/royosherove/repo-swarm-sample-results-hub). 
 
+## Credits
+RepoSwarm was born out of a hackathon we ran at Verbit, in which our team, comprised of [Moshe](https://github.com/mosher), [Idan](https://github.com/Idandos) and [Roy](https://github.com/royosherove) created this project together. 
+
 ## What's This For?
 
 RepoSwarm is an intelligent agentic-like engine that:
