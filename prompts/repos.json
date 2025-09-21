@@ -21,6 +21,16 @@
       "url": "https://github.com/sindresorhus/open",
       "description": "A Node.js package to open stuff like URLs, files, and executables cross-platform",
       "type": "libraries"
+    },
+    "repo-swarm": {
+      "url": "https://github.com/royosherove/repo-swarm",
+      "description": "No description available",
+      "type": "backend"
+    },
+    "repo-swarm-sample-results-hub": {
+      "url": "https://github.com/royosherove/repo-swarm-sample-results-hub",
+      "description": "Sample results from repo-swarm project",
+      "type": "generic"
     }
   }
 }

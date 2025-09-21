@@ -309,7 +309,7 @@ def update_repos_json(repos: List[Dict], existing_repos_file: str) -> None:
         raise ValueError("The 'default' field in repos.json cannot be None. Please set a valid default repository URL.")
     
     updated_data = {
-        "default": existing_data.get("default", Config.LEGACY_DEFAULT_REPO_URL),
+        "default": existing_data.get("default", Config.DEFAULT_REPO_URL),
         "_comment": existing_data.get("_comment", "Available types: generic, backend, frontend, mobile, infra-as-code, libraries"),
         "repositories": all_repos
     }
