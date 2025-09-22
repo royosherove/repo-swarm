@@ -444,41 +444,45 @@ class ConfigVerifier:
     def _test_arch_hub_access(self) -> Tuple[str, str, str, str]:
         """Test architecture hub repository access."""
         arch_hub_url = self.config.get_arch_hub_repo_url()
+        # Extract repo name from URL for display
+        repo_display = '/'.join(arch_hub_url.split('/')[-2:]) if '/' in arch_hub_url else arch_hub_url
         try:
             perm_result = self.git_manager.check_repository_permissions(arch_hub_url)
             if perm_result['status'] == 'allowed':
-                self._add_success("Architecture Hub access: Allowed")
-                return "✅", "Architecture Hub", "PUSH ACCESS", "Granted"
+                self._add_success(f"Architecture Hub ({arch_hub_url}) access: Allowed")
+                return "✅", f"Arch Hub ({repo_display})", "PUSH ACCESS", "Granted"
             elif perm_result['status'] == 'denied':
-                self._add_warning("Architecture Hub access: Push denied (read-only access)")
-                return "⚠️", "Architecture Hub", "READ ONLY", "Push denied"
+                self._add_warning(f"Architecture Hub ({arch_hub_url}) access: Push denied (read-only access)")
+                return "⚠️", f"Arch Hub ({repo_display})", "READ ONLY", "Push denied"
             elif perm_result['status'] == 'not_found':
-                self._add_warning("Architecture Hub access: Repository not found")
-                return "⚠️", "Architecture Hub", "NOT FOUND", "Repository not found"
+                self._add_warning(f"Architecture Hub ({arch_hub_url}) access: Repository not found")
+                return "⚠️", f"Arch Hub ({repo_display})", "NOT FOUND", "Repository not found"
             else:
-                self._add_warning(f"Architecture Hub access: {perm_result['message']}")
-                return "⚠️", "Architecture Hub", "UNKNOWN", perm_result['message']
+                self._add_warning(f"Architecture Hub ({arch_hub_url}) access: {perm_result['message']}")
+                return "⚠️", f"Arch Hub ({repo_display})", "UNKNOWN", perm_result['message']
         except Exception as e:
             self._add_warning(f"Architecture Hub access test failed: {str(e)}")
-            return "⚠️", "Architecture Hub", "TEST FAILED", str(e)
+            return "⚠️", f"Arch Hub ({repo_display})", "TEST FAILED", str(e)
 
     def _test_default_repo_access(self) -> Tuple[str, str, str, str]:
         """Test default repository access."""
         default_repo = os.getenv('DEFAULT_REPO_URL', self.config.DEFAULT_REPO_URL)
+        # Extract repo name from URL for display
+        repo_display = default_repo.split('/')[-1] if '/' in default_repo else default_repo
         try:
             perm_result = self.git_manager.check_repository_permissions(default_repo)
             if perm_result['status'] == 'allowed':
-                self._add_success("Default Repository access: Allowed")
-                return "✅", "Default Repository", "PUSH ACCESS", "Granted"
+                self._add_success(f"Default Repository ({default_repo}) access: Allowed")
+                return "✅", f"Default Repo ({repo_display})", "PUSH ACCESS", "Granted"
             elif perm_result['status'] == 'denied':
-                self._add_warning("Default Repository access: Push denied (read-only access)")
-                return "⚠️", "Default Repository", "READ ONLY", "Push denied"
+                self._add_warning(f"Default Repository ({default_repo}) access: Push denied (read-only access)")
+                return "⚠️", f"Default Repo ({repo_display})", "READ ONLY", "Push denied"
             elif perm_result['status'] == 'not_found':
-                self._add_warning("Default Repository access: Repository not found")
-                return "⚠️", "Default Repository", "NOT FOUND", "Repository not found"
+                self._add_warning(f"Default Repository ({default_repo}) access: Repository not found")
+                return "⚠️", f"Default Repo ({repo_display})", "NOT FOUND", "Repository not found"
             else:
-                self._add_warning(f"Default Repository access: {perm_result['message']}")
-                return "⚠️", "Default Repository", "UNKNOWN", perm_result['message']
+                self._add_warning(f"Default Repository ({default_repo}) access: {perm_result['message']}")
+                return "⚠️", f"Default Repo ({repo_display})", "UNKNOWN", perm_result['message']
         except Exception as e:
             self._add_warning(f"Default Repository access test failed: {str(e)}")
             return "⚠️", "Default Repository", "TEST FAILED", str(e)

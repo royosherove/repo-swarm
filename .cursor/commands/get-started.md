@@ -58,6 +58,12 @@ Guide them through the interactive setup:
    python -c "import temporalio; print('✅ Temporal SDK installed')"
    ```
 
+3. **Verify Configuration**
+   ```bash
+   mise verify-config
+   ```
+   This validates your configuration and tests repository access. It's recommended to run this before proceeding.
+
 ### Phase 3: First Test Run
 Walk them through their first analysis:
 
@@ -138,7 +144,7 @@ Proactively check for common issues:
 
 3. **Clean Restart if Needed**
    ```bash
-   mise dev-stop && mise cleanup-temp
+   mise kill && mise cleanup-temp
    ```
 
 ## Interactive Teaching Points

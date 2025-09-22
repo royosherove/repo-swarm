@@ -19,7 +19,6 @@
 #
 # 🧪 TESTING & VALIDATION:
 #   - verify-config: For configuration validation and repository access testing
-#   - test-arch-hub: For testing architecture hub save functionality with dummy files
 #   - test-all/test-units/test-integration: For comprehensive testing (use 'test-units' for quick feedback during development)
 #   - test-dynamodb*: For database connectivity and functionality testing
 #   - docker-test*: For container build and deployment validation
@@ -31,7 +30,7 @@
 #
 # 🧹 MAINTENANCE & CLEANUP:
 #   - cleanup-temp: When freeing disk space or resetting test environments
-#   - dev-stop: When stopping background processes and resetting development environment
+#   - kill: When stopping background processes and resetting development environment
 #   - deploy-secrets: When deploying to AWS and managing production secrets
 #
 # 📦 CONTAINERIZATION:
@@ -44,7 +43,7 @@
 # 1. For LOCAL DEVELOPMENT: Use 'dev-temporal' + 'dev-worker' + 'investigate-all'/'investigate-one'
 # 2. For PRODUCTION: Use 'investigate-public'/'investigate-debug' with proper .env
 # 3. For TESTING: Start with 'verify-config', then 'test-units', then 'test-all', then 'test-dynamodb*' as needed
-# 4. For DEBUGGING: Use '*-debug' variants, 'test-arch-hub' for git issues, and 'monitor-workflow'/'monitor-workflow-retry' for monitoring
+# 4. For DEBUGGING: Use '*-debug' variants and 'monitor-workflow'/'monitor-workflow-retry' for monitoring
 # 5. For CONTAINERIZATION: Use 'docker-*' tasks matching your deployment strategy
 #
 # Each task description includes specific "Use when:" guidance for precise tool selection.
@@ -55,7 +54,7 @@ temporal = "latest"
 uv = "latest"
 
 [env]
-_.file = ".env"
+_.file = [".env.local", ".env"]
 
 [tasks]
 # Get started wizard
@@ -86,7 +85,7 @@ dev-client = "cd src && python -m client"
 # Kill all Temporal servers and workers
 # Stops all running Temporal processes and workers
 # Use when: cleaning up after testing, stopping background processes, or resetting development environment
-dev-stop = "scripts/kill.sh"
+kill = "scripts/kill.sh"
 
 # Run the complete hello world workflow
 # Executes a full hello world workflow demonstration (requires Temporal server to be running)
@@ -477,20 +476,18 @@ investigate-production-one = "scripts/investigate-single.sh $@"
 # Use when: checking configuration before deployment, validating environment setup, or troubleshooting access issues
 verify-config = """
     echo "🔍 Verifying RepoSwarm configuration..." && \
+    if [ -f .env.local ]; then
+        echo "📂 Loading configuration from .env.local..." && \
+        set -a && \
+        source .env.local && \
+        set +a && \
+        echo "✅ Loaded .env.local"
+    else
+        echo "⚠️  Warning: .env.local not found, using default settings"
+    fi && \
     uv sync 2>/dev/null || echo "Dependencies already installed" && \
     uv add rich requests 2>/dev/null || echo "Rich library not available, using plain text tables" && \
     mise exec python@3.12 -- python scripts/verify_config.py
-"""
-
-# Test architecture hub save functionality
-# Tests the save_to_arch_hub activity with dummy files to verify configuration
-# Usage: mise test-arch-hub
-# Use when: debugging architecture hub issues, testing repository access, or verifying git operations
-test-arch-hub = """
-    echo "🧪 Testing architecture hub save functionality..." && \
-    uv sync 2>/dev/null || echo "Dependencies already installed" && \
-    uv add rich requests 2>/dev/null || echo "Rich library not available, using plain text tables" && \
-    mise exec python@3.12 -- python scripts/test_arch_hub.py
 """
 
 # Test DynamoDB functionality locally

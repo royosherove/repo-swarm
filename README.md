@@ -166,7 +166,7 @@ mise dev-dependencies      # Install Python dependencies
 mise dev-worker           # Start Temporal worker
 mise dev-client           # Run workflow client
 mise dev-hello            # Test basic workflow
-mise dev-stop             # Stop all Temporal processes
+mise kill                 # Stop all Temporal processes
 mise dev-repos-list       # List available repositories
 mise dev-repos-update     # Update repository list from GitHub
 ```
@@ -181,6 +181,7 @@ mise investigate-debug    # Analyze with detailed logging
 
 ### Testing Tasks (`test-*`)
 ```bash
+mise verify-config        # Validate configuration and test repository access
 mise test-all             # Run complete test suite
 mise test-units           # Run unit tests only
 mise test-integration     # Run integration tests
@@ -395,7 +396,7 @@ mise test-dynamodb           # DynamoDB tests
 **Clean Development Environment**
 ```bash
 # Stop all processes
-mise dev-stop
+mise kill
 
 # Clean temporary files
 mise cleanup-temp
@@ -423,7 +424,7 @@ mise dev-temporal
 mise test-all
 
 # Clean up when done
-mise dev-stop
+mise kill
 mise cleanup-temp
 ```
 
