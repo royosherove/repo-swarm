@@ -19,6 +19,8 @@ RepoSwarm is an intelligent agentic-like engine that:
 - 💾 Caches results to avoid redundant analysis
 - Writes the results into a results repository that you configure
 
+📋 **See it in action**: Check out [RepoSwarm's self-analysis report](https://github.com/royosherove/repo-swarm-sample-results-hub/blob/main/repo-swarm.arch.md) - an example of RepoSwarm investigating its own codebase!
+
 ## How It Works
 
 RepoSwarm runs as a Temporal workflow that automatically processes repositories and feeds  a configured targer repository.
