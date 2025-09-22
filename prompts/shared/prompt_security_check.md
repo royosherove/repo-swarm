@@ -1,4 +1,4 @@
-version=1
+version=2
 # Prompt Injection and LLM Security Assessment
 
 You are a security auditor specializing in LLM and prompt injection vulnerabilities. First, identify all LLM usage in this codebase, then analyze for security issues based on the "lethal trifecta" framework and other known attack vectors.
@@ -10,7 +10,11 @@ You are a security auditor specializing in LLM and prompt injection vulnerabilit
 
 ### 1.1 LLM Infrastructure Identification
 
-Scan the entire codebase and identify ALL usage of:
+Scan the entire codebase using multiple detection strategies:
+
+#### Detection Strategy 1: Library and Package Detection
+
+Look for these in imports, requirements, dependencies, and package files:
 
 - **API-based LLMs:**
   - OpenAI (GPT-3.5, GPT-4, GPT-4 Turbo, GPT-5, text-davinci, etc.)
@@ -31,14 +35,331 @@ Scan the entire codebase and identify ALL usage of:
   - Model Context Protocol (MCP)
   - AutoGPT, BabyAGI, or other agent frameworks
   - Vector databases (Pinecone, Weaviate, Chroma, FAISS, etc.)
-  
+
+#### Detection Strategy 2: Import/Include Pattern Matching
+
+Search for import/require/include statements across all languages (case-insensitive):
+
+**Python:**
+- `import anthropic` or `from anthropic`
+- `import openai` or `from openai`
+- `import google.generativeai` or `from google.generativeai`
+- `import transformers` or `from transformers`
+
+**JavaScript/TypeScript:**
+- `require('openai')` or `require("openai")`
+- `import OpenAI from 'openai'`
+- `import { Anthropic } from '@anthropic-ai/sdk'`
+- `import { GoogleGenerativeAI } from '@google/generative-ai'`
+
+**Java:**
+- `import com.openai.*`
+- `import com.anthropic.*`
+- `import com.google.cloud.aiplatform.*`
+
+**C#/.NET:**
+- `using OpenAI;`
+- `using Azure.AI.OpenAI;`
+- `using Anthropic;`
+
+**Go:**
+- `import "github.com/sashabaranov/go-openai"`
+- `import "github.com/anthropics/anthropic-sdk-go"`
+
+**Ruby:**
+- `require 'openai'`
+- `gem 'ruby-openai'`
+
+**PHP:**
+- `use OpenAI\Client;`
+- `require_once 'vendor/openai-php/client';`
+
+**Rust:**
+- `use openai_api_rust::*;`
+- `use anthropic::*;`
+
+Any variations with underscores, hyphens, or different casing
+
+#### Detection Strategy 3: API Client Instantiation Patterns
+
+Look for direct API client creation across languages:
+
+**Python:**
+- `Anthropic(` or `anthropic.Anthropic(`
+- `OpenAI(` or `openai.OpenAI(`
+- `GoogleGenerativeAI(`
+
+**JavaScript/TypeScript:**
+- `new OpenAI({` or `new OpenAI(`
+- `new Anthropic({` or `new Anthropic(`
+- `new ChatGPTAPI(`
+- `new GoogleGenerativeAI(`
+
+**Java:**
+- `new OpenAiService(`
+- `OpenAI.builder()`
+- `AnthropicClient.create(`
+- `VertexAI.init(`
+
+**C#/.NET:**
+- `new OpenAIClient(`
+- `new AnthropicClient(`
+- `new AzureOpenAIClient(`
+
+**Go:**
+- `openai.NewClient(`
+- `anthropic.NewClient(`
+- `azopenai.NewClient(`
+
+**Ruby:**
+- `OpenAI::Client.new(`
+- `Anthropic::Client.new(`
+
+**PHP:**
+- `OpenAI::client(`
+- `new OpenAIClient(`
+- `Anthropic::factory(`
+
+**Generic Patterns (any language):**
+- Any class/object ending in `Client`, `API`, `Service`, `Analyzer`, `Generator` with LLM-related context
+- Constructor calls with `apiKey`, `api_key`, `token` parameters
+
+#### Detection Strategy 4: API Method Call Patterns
+
+Search for characteristic API method calls across languages:
+
+**Common Patterns (most languages):**
+- `.messages.create(` (Anthropic pattern)
+- `.chat.completions.create(` (OpenAI pattern)
+- `.completions.create(`
+- `.generateContent(` or `.generate_content(`
+- `.generateText(` or `.generate_text(`
+- `.complete(` or `.completion(`
+- `.invoke(` with prompt/text parameters
+- `.predict(` with text parameters
+- `.embed(` or `.embeddings.create(`
+- `.createCompletion(`
+- `.createChatCompletion(`
+- `.sendMessage(` or `.send_message(`
+
+**JavaScript/TypeScript specific:**
+- `.chat.completions.create({`
+- `.generateContent({`
+- `await openai.createCompletion(`
+- `.run(` with prompt parameter
+
+**Java specific:**
+- `.createCompletion(`
+- `.generateMessage(`
+- `.predict(`
+
+**C#/.NET specific:**
+- `.GetCompletionsAsync(`
+- `.CompleteAsync(`
+- `.GenerateMessageAsync(`
+
+**Go specific:**
+- `.CreateCompletion(`
+- `.CreateChatCompletion(`
+- `.Generate(`
+
+**HTTP/REST patterns (any language):**
+- POST requests to `api.openai.com`, `api.anthropic.com`, `generativelanguage.googleapis.com`
+- Headers with `Authorization: Bearer` or `x-api-key`
+- Request bodies with `prompt`, `messages`, `model` fields
+
+#### Detection Strategy 5: Configuration and Environment Variables
+
+Look for LLM-related configuration:
+- Environment variables: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `CLAUDE_API_KEY`, etc.
+- Config files with: `api_key`, `model`, `temperature`, `max_tokens`
+- Model names in strings: "gpt-", "claude-", "text-davinci", "gemini", etc.
+
+#### Detection Strategy 6: Prompt-Related Patterns
+
+Search for prompt handling code:
+- Variables/parameters named: `prompt`, `system_prompt`, `user_prompt`, `messages`
+- Template strings with placeholders: `{context}`, `{input}`, `{question}`
+- Prompt construction: string concatenation with user input
+- Files with extensions: `.prompt`, `.tmpl`, or directories named `prompts`
+
+#### Detection Strategy 7: Custom Implementation Patterns
+
+Look for custom wrapper classes or modules:
+- Files/classes with names containing: `llm`, `ai`, `ml`, `claude`, `gpt`, `analyzer`, `generator`
+- Classes that have methods like `analyze`, `generate`, `complete`, `predict` with text parameters
+- Any file that processes text and returns AI-generated responses
+
 - **Prompt Engineering:**
   - Prompt templates or prompt management systems
   - Few-shot learning examples
   - Chain-of-thought prompting
   - System prompts or instruction templates
 
-### 1.2 Detailed Usage Documentation
+### 1.2 File Analysis Instructions
+
+When analyzing the repository structure:
+
+1. **Priority Files to Examine:**
+   - Any file with names containing: `llm`, `ai`, `ml`, `claude`, `gpt`, `openai`, `anthropic`, `analyzer`, `generator`
+   - Configuration files: `config.*`, `settings.*`, `.env`, `application.properties`, `appsettings.json`
+   - Package/dependency files:
+     - Python: `requirements.txt`, `pyproject.toml`, `Pipfile`, `poetry.lock`, `setup.py`
+     - JavaScript/TypeScript: `package.json`, `package-lock.json`, `yarn.lock`
+     - Java: `pom.xml`, `build.gradle`, `build.gradle.kts`
+     - C#/.NET: `*.csproj`, `packages.config`, `*.fsproj`
+     - Go: `go.mod`, `go.sum`
+     - Ruby: `Gemfile`, `Gemfile.lock`
+     - PHP: `composer.json`, `composer.lock`
+     - Rust: `Cargo.toml`, `Cargo.lock`
+   - Main application files that might orchestrate AI functionality
+   - Files in directories named: `ai`, `ml`, `llm`, `models`, `prompts`, `agents`
+
+2. **Code Patterns to Flag:**
+   - Any class or function that takes text input and returns generated text
+   - Methods that build or manipulate prompts
+   - API key handling or authentication for external services
+   - HTTP requests to known AI service endpoints
+   - Model loading or initialization code
+
+3. **Don't Be Misled By:**
+   - Comments or documentation mentioning LLMs (focus on actual implementation)
+   - Test files that mock LLM behavior (note these separately)
+   - Example code that isn't actually used
+
+### 1.3 Example Detection Scenarios
+
+The following are real-world patterns that MUST be detected across different languages:
+
+**Scenario 1: Custom Wrapper Class (Python)**
+```python
+# File: claude_analyzer.py
+from anthropic import Anthropic
+
+class ClaudeAnalyzer:
+    def __init__(self, api_key: str):
+        self.client = Anthropic(api_key=api_key)
+    
+    def analyze(self, prompt: str):
+        response = self.client.messages.create(...)
+```
+**Detection:** Custom analyzer class wrapping Anthropic API
+
+**Scenario 2: TypeScript/Node.js Service**
+```typescript
+// File: ai-service.ts
+import OpenAI from 'openai';
+
+export class AIService {
+    private openai: OpenAI;
+    
+    constructor() {
+        this.openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY
+        });
+    }
+    
+    async generateResponse(prompt: string) {
+        const completion = await this.openai.chat.completions.create({
+            messages: [{ role: "user", content: prompt }],
+            model: "gpt-4"
+        });
+        return completion.choices[0].message.content;
+    }
+}
+```
+**Detection:** TypeScript service class using OpenAI
+
+**Scenario 3: Java Spring Boot Integration**
+```java
+// File: LLMService.java
+@Service
+public class LLMService {
+    private final OpenAiService openAiService;
+    
+    public LLMService(@Value("${openai.api.key}") String apiKey) {
+        this.openAiService = new OpenAiService(apiKey);
+    }
+    
+    public String generateText(String prompt) {
+        CompletionRequest request = CompletionRequest.builder()
+            .prompt(prompt)
+            .model("text-davinci-003")
+            .build();
+        return openAiService.createCompletion(request).getChoices().get(0).getText();
+    }
+}
+```
+**Detection:** Java service with OpenAI integration
+
+**Scenario 4: C# .NET API Controller**
+```csharp
+// File: AIController.cs
+[ApiController]
+public class AIController : ControllerBase
+{
+    private readonly OpenAIClient _client;
+    
+    public AIController(IConfiguration configuration)
+    {
+        _client = new OpenAIClient(configuration["OpenAI:ApiKey"]);
+    }
+    
+    [HttpPost("generate")]
+    public async Task<IActionResult> Generate([FromBody] string prompt)
+    {
+        var response = await _client.GetCompletionsAsync(prompt);
+        return Ok(response);
+    }
+}
+```
+**Detection:** C# controller with OpenAI client
+
+**Scenario 5: Go HTTP Handler**
+```go
+// File: handler.go
+import (
+    "github.com/sashabaranov/go-openai"
+)
+
+func HandleGeneration(w http.ResponseWriter, r *http.Request) {
+    client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+    
+    resp, err := client.CreateChatCompletion(
+        context.Background(),
+        openai.ChatCompletionRequest{
+            Model: openai.GPT4,
+            Messages: []openai.ChatCompletionMessage{
+                {Role: "user", Content: prompt},
+            },
+        },
+    )
+}
+```
+**Detection:** Go HTTP handler using OpenAI
+
+**Scenario 6: Direct HTTP API Calls (Any Language)**
+```javascript
+// File: api-client.js
+async function callClaude(prompt) {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+            'x-api-key': process.env.ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+            model: 'claude-3-opus-20240229',
+            messages: [{ role: 'user', content: prompt }]
+        })
+    });
+    return response.json();
+}
+```
+**Detection:** Direct HTTP calls to LLM APIs
+
+### 1.4 Detailed Usage Documentation
 
 For EACH LLM usage found, document:
 
