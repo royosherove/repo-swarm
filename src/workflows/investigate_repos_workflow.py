@@ -224,9 +224,12 @@ class InvestigateReposWorkflow:
         window_size = config_overrides.chunk_size or WorkflowConfig.WORKFLOW_CHUNK_SIZE  # Maximum concurrent workflows
         repo_items = list(repositories.items())
         
-        # Filter out repos without URLs
+        # Filter out repos without URLs (and skip comment entries which are strings)
         valid_repos = []
         for repo_name, repo_info in repo_items:
+            # Skip comment entries (strings) and non-dict entries
+            if not isinstance(repo_info, dict):
+                continue
             repo_url = repo_info.get("url")
             if not repo_url:
                 logger.warning(f"No URL found for repository: {repo_name}")

@@ -33,8 +33,9 @@ async def run_investigate_repos_workflow(client: Client, force: bool = False,
     
     task_queue = os.getenv("TEMPORAL_TASK_QUEUE", "investigate-task-queue")
     
-    # Use a stable workflow ID so we can query/cancel it
-    workflow_id = "investigate-repos-workflow-continuous"
+    # Generate unique workflow ID with timestamp to avoid conflicts
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    workflow_id = f"investigate-repos-workflow-{timestamp}"
     
     logger.info(f"Starting InvestigateReposWorkflow on task queue: {task_queue}")
     logger.info(f"Using workflow ID: {workflow_id}")

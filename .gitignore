@@ -1,6 +1,9 @@
+.cursor/screenshots/
+.cursor/logs/
 src/prompts/skip_repos.json
 .env*
 src/investigator/temp/
+/prompts/skip_repos.json
 
 # Python
 __pycache__/

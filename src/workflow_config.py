@@ -6,20 +6,28 @@ to avoid Temporal workflow sandbox restrictions.
 
 
 class WorkflowConfig:
-    """Configuration constants for workflows - no external dependencies."""
+    """Configuration constants for workflows - no external dependencies.
     
-    # Claude API settings
-    CLAUDE_MODEL = "claude-sonnet-4-20250514"
+    NOTE: This config is NOT used for actual Claude API calls.
+    The actual model is set in src/investigator/core/config.py (Config class).
+    This exists only for Temporal workflow sandbox compatibility.
+    """
+    
+    # Claude API settings (not actually used - see note above)
+    CLAUDE_MODEL = "claude-opus-4-5-20251101"
     MAX_TOKENS = 6000
     
-    # Valid Claude model names for validation
+    # Valid Claude model names for validation (4.x models only)
+    # See: https://platform.claude.com/docs/en/about-claude/models/overview
     VALID_CLAUDE_MODELS = [
-        "claude-3-5-sonnet-20241022",
-        "claude-3-5-haiku-20241022", 
-        "claude-3-opus-20240229",
-        "claude-3-sonnet-20240229",
-        "claude-3-haiku-20240307",
-        "claude-sonnet-4-20250514"  # current default
+        # Claude 4.5 (current)
+        "claude-sonnet-4-5-20250929",
+        "claude-haiku-4-5-20251001",
+        "claude-opus-4-5-20251101",  # current default
+        "claude-opus-4-1-20250805",
+        # Claude 4.0 (legacy)
+        "claude-sonnet-4-20250514",
+        "claude-opus-4-20250514",
     ]
     
     # Workflow configuration

@@ -62,15 +62,16 @@ _.file = [".env.local", ".env"]
 # Use when: first time setup, configuring local development environment, or regenerating configuration
 get-started = "scripts/get-started.sh"
 
-# Start Temporal server
-# Launches the Temporal development server for workflow orchestration
-# Use when: setting up local development environment, starting workflows, or testing Temporal-based functionality
-dev-temporal = "temporal server start-dev"
-
 # Install Python dependencies
 # Installs all required Python packages using uv
 # Use when: initial project setup, after pulling new code, or when dependencies are missing
 dev-dependencies = "uv sync"
+
+# Start Temporal server
+# Launches the Temporal development server for workflow orchestration
+# Use when: setting up local development environment, starting workflows, or testing Temporal-based functionality
+dev-server = "temporal server start-dev"
+
 
 # Run the Temporal worker
 # Starts the Temporal worker process to execute workflow activities
@@ -79,8 +80,9 @@ dev-worker = "cd src && mise exec python@3.12 -- python -m investigate_worker"
 
 # Run the workflow client
 # Executes the main client to trigger and manage workflows
+# Defaults to chunk-size 2 for conservative parallel processing
 # Use when: manually triggering workflows, testing workflow initiation, or managing running workflows
-dev-client = "cd src && python -m client"
+dev-client = "cd src && python -m client investigate --chunk-size=2"
 
 # Kill all Temporal servers and workers
 # Stops all running Temporal processes and workers
