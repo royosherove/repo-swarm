@@ -1,6 +1,8 @@
 # RepoSwarm🤖
 ![RepoSwarm](RepoSwarm1.jpg)
 
+🎬 **Architecture Overview (click to play)**  
+[![▶ Watch](https://img.youtube.com/vi/rOMf9xvpgtc/hqdefault.jpg)](https://www.youtube.com/watch?v=rOMf9xvpgtc)
 
 RepoSwarm is an AI powered multi-repo architecture discovery platform that generates its output in a specialized output repository that you can use for agent context.
 
