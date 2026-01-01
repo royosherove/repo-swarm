@@ -1,0 +1,17 @@
+{
+  "include": [
+    "src",
+    "tests",
+    "scripts"
+  ],
+  "exclude": [
+    "temp",
+    "src/temp",
+    "src/investigator/temp",
+    "build",
+    "dist"
+  ],
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "basic",
+  "reportMissingTypeStubs": false
+}
