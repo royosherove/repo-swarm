@@ -12,6 +12,10 @@ print("Environment variables:", flush=True)
 print(f"  PROMPT_CONTEXT_STORAGE: {os.environ.get('PROMPT_CONTEXT_STORAGE', 'NOT SET')}", flush=True)
 print(f"  SKIP_DYNAMODB_CHECK: {os.environ.get('SKIP_DYNAMODB_CHECK', 'NOT SET')}", flush=True)
 print(f"  LOCAL_TESTING: {os.environ.get('LOCAL_TESTING', 'NOT SET')}", flush=True)
+print(f"  CLAUDE_MODEL: {os.environ.get('CLAUDE_MODEL', 'NOT SET')}", flush=True)
+print(f"  ANTHROPIC_BASE_URL: {os.environ.get('ANTHROPIC_BASE_URL', 'NOT SET')}", flush=True)
+api_key_status = "present (masked)" if os.environ.get('ANTHROPIC_API_KEY') else "NOT SET"
+print(f"  ANTHROPIC_API_KEY: {api_key_status}", flush=True)
 print("=" * 60, flush=True)
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))

@@ -4,9 +4,51 @@
 # Usage: ./single.sh [REPO_NAME_OR_URL] [force] [model MODEL] [max-tokens NUM] [type TYPE]
 # Default repository is "is-odd" if not specified
 
-# Always load .env.local file for local testing
+# Sanitize input to prevent command injection
+sanitize_input() {
+    local input="$1"
+    # Remove shell metacharacters and control characters
+    echo "$input" | tr -d ';|&$`<>(){}[]!*?~#'
+}
+
+# Cleanup function for error handling
+cleanup() {
+    local exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+        echo ""
+        echo "❌ Script failed with exit code $exit_code"
+    fi
+    echo "🧹 Cleaning up..."
+    [ -n "$WORKER_PID" ] && kill $WORKER_PID 2>/dev/null && echo "   Stopped worker (PID: $WORKER_PID)"
+    [ -n "$SERVER_PID" ] && kill $SERVER_PID 2>/dev/null && echo "   Stopped Temporal server (PID: $SERVER_PID)"
+    echo "✅ Cleanup complete"
+}
+
+# Register cleanup for all exit conditions
+trap cleanup EXIT ERR INT TERM
+
+# Validate and load .env.local file for local testing
 if [ -f ".env.local" ]; then
     echo "📂 Loading configuration from .env.local..."
+
+    # Security check: verify file ownership and permissions
+    if [ "$(stat -f '%u' .env.local 2>/dev/null || stat -c '%u' .env.local 2>/dev/null)" != "$(id -u)" ]; then
+        echo "⚠️  Warning: .env.local is not owned by current user"
+        read -p "Continue anyway? (y/N) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "❌ Aborted for security reasons"
+            exit 1
+        fi
+    fi
+
+    # Check if file has overly permissive permissions
+    file_perms=$(stat -f '%Lp' .env.local 2>/dev/null || stat -c '%a' .env.local 2>/dev/null)
+    if [ "${file_perms: -1}" != "0" ]; then
+        echo "⚠️  Warning: .env.local has world-readable permissions ($file_perms)"
+        echo "💡 Recommended: chmod 600 .env.local"
+    fi
+
     set -a  # Export all variables
     source .env.local
     set +a  # Stop exporting
@@ -44,7 +86,7 @@ fi
 
 # Default repository if not specified
 DEFAULT_REPO="is-odd"
-REPO_ARG="${1:-$DEFAULT_REPO}"
+REPO_ARG=$(sanitize_input "${1:-$DEFAULT_REPO}")
 
 # Check if first argument is a special flag (h, help, dry-run, force, etc.)
 if [[ "$1" == "h" ]] || [[ "$1" == "help" ]]; then
@@ -105,7 +147,8 @@ echo "Repository: $REPO_ARG"
 # Parse remaining arguments for configuration overrides
 FORCE_FLAG=""
 FORCE_SECTION=""
-CLAUDE_MODEL=""
+CLAUDE_MODEL_ARG=""
+CLAUDE_MODEL_VALUE=""
 MAX_TOKENS=""
 REPO_TYPE=""
 DRY_RUN=false
@@ -144,7 +187,8 @@ for arg in $ARGS_TO_PROCESS; do
                 echo "🔧 Force section override: $arg"
                 FORCE_SECTION_NEXT=false
             elif [ "$CLAUDE_MODEL_NEXT" = true ]; then
-                CLAUDE_MODEL="--claude-model=$arg"
+                CLAUDE_MODEL_ARG="--claude-model=$arg"
+                CLAUDE_MODEL_VALUE="$arg"
                 echo "🤖 Using Claude model: $arg"
                 CLAUDE_MODEL_NEXT=false
             elif [ "$MAX_TOKENS_NEXT" = true ]; then
@@ -175,12 +219,28 @@ done
 
 # Start the worker in background
 echo "Starting Temporal worker..."
-cd src && python -m investigate_worker &
+# Override CLAUDE_MODEL environment variable if specified via command-line
+if [ -n "$CLAUDE_MODEL_VALUE" ]; then
+    export CLAUDE_MODEL="$CLAUDE_MODEL_VALUE"
+fi
+# Debug: verify environment variables are set
+echo "   CLAUDE_MODEL=${CLAUDE_MODEL}"
+echo "   ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL}"
+if [ -n "$ANTHROPIC_API_KEY" ]; then
+    echo "   ANTHROPIC_API_KEY=********** (present)"
+else
+    echo "   ANTHROPIC_API_KEY=(not set)"
+fi
+# Ensure environment variables are exported before starting worker
+export ANTHROPIC_BASE_URL ANTHROPIC_API_KEY CLAUDE_MODEL
+(cd src && uv run python -m investigate_worker) &
 WORKER_PID=$!
 sleep 3
 
 # Prepare the command
-CMD="cd src && python -m client investigate-single \"$REPO_ARG\" $FORCE_FLAG $FORCE_SECTION $CLAUDE_MODEL $MAX_TOKENS $REPO_TYPE"
+# Export environment variables to ensure they're available in subprocess
+export LOCAL_TESTING SKIP_DYNAMODB_CHECK PROMPT_CONTEXT_STORAGE
+CMD="cd src && uv run python -m client investigate-single \"$REPO_ARG\" $FORCE_FLAG $FORCE_SECTION $CLAUDE_MODEL_ARG $MAX_TOKENS $REPO_TYPE"
 
 if [ "$DRY_RUN" = true ]; then
     echo ""
@@ -191,7 +251,7 @@ if [ "$DRY_RUN" = true ]; then
     echo "   Repository: $REPO_ARG"
     [ -n "$FORCE_FLAG" ] && echo "   Force: enabled"
     [ -n "$FORCE_SECTION" ] && echo "   Force section: ${FORCE_SECTION#--force-section=}"
-    [ -n "$CLAUDE_MODEL" ] && echo "   Model override: ${CLAUDE_MODEL#--claude-model=}"
+    [ -n "$CLAUDE_MODEL_ARG" ] && echo "   Model override: ${CLAUDE_MODEL_ARG#--claude-model=}"
     [ -n "$MAX_TOKENS" ] && echo "   Max tokens override: ${MAX_TOKENS#--max-tokens=}"
     [ -n "$REPO_TYPE" ] && echo "   Repository type override: ${REPO_TYPE#--type=}"
 else
@@ -200,21 +260,18 @@ else
     echo "   Repository: $REPO_ARG"
     [ -n "$FORCE_FLAG" ] && echo "   Force: enabled"
     [ -n "$FORCE_SECTION" ] && echo "   Force section: ${FORCE_SECTION#--force-section=}"
-    [ -n "$CLAUDE_MODEL" ] && echo "   Model: ${CLAUDE_MODEL#--claude-model=}"
+    [ -n "$CLAUDE_MODEL_ARG" ] && echo "   Model: ${CLAUDE_MODEL_ARG#--claude-model=}"
     [ -n "$MAX_TOKENS" ] && echo "   Max tokens: ${MAX_TOKENS#--max-tokens=}"
     [ -n "$REPO_TYPE" ] && echo "   Repository type: ${REPO_TYPE#--type=}"
     echo ""
     echo "Running single repository investigation..."
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     # Run the workflow
     eval $CMD
 fi
 
-# Cleanup
+# Cleanup will be handled by trap
 echo ""
-echo "Cleaning up..."
-kill $WORKER_PID 2>/dev/null
-kill $SERVER_PID 2>/dev/null
 echo "✅ Single repository investigation complete!"

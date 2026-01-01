@@ -1,8 +1,50 @@
 #!/bin/bash
 
-# Always load .env.local file for local testing
+# Sanitize input to prevent command injection
+sanitize_input() {
+    local input="$1"
+    # Remove shell metacharacters and control characters
+    echo "$input" | tr -d ';|&$`<>(){}[]!*?~#'
+}
+
+# Cleanup function for error handling
+cleanup() {
+    local exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+        echo ""
+        echo "❌ Script failed with exit code $exit_code"
+    fi
+    echo "🧹 Cleaning up..."
+    [ -n "$WORKER_PID" ] && kill $WORKER_PID 2>/dev/null && echo "   Stopped worker (PID: $WORKER_PID)"
+    [ -n "$SERVER_PID" ] && kill $SERVER_PID 2>/dev/null && echo "   Stopped Temporal server (PID: $SERVER_PID)"
+    echo "✅ Cleanup complete"
+}
+
+# Register cleanup for all exit conditions
+trap cleanup EXIT ERR INT TERM
+
+# Validate and load .env.local file for local testing
 if [ -f ".env.local" ]; then
     echo "📂 Loading configuration from .env.local..."
+
+    # Security check: verify file ownership and permissions
+    if [ "$(stat -f '%u' .env.local 2>/dev/null || stat -c '%u' .env.local 2>/dev/null)" != "$(id -u)" ]; then
+        echo "⚠️  Warning: .env.local is not owned by current user"
+        read -p "Continue anyway? (y/N) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "❌ Aborted for security reasons"
+            exit 1
+        fi
+    fi
+
+    # Check if file has overly permissive permissions
+    file_perms=$(stat -f '%Lp' .env.local 2>/dev/null || stat -c '%a' .env.local 2>/dev/null)
+    if [ "${file_perms: -1}" != "0" ]; then
+        echo "⚠️  Warning: .env.local has world-readable permissions ($file_perms)"
+        echo "💡 Recommended: chmod 600 .env.local"
+    fi
+
     set -a  # Export all variables
     source .env.local
     set +a  # Stop exporting
@@ -186,6 +228,8 @@ echo ""
 export PROMPT_CONTEXT_STORAGE=${PROMPT_CONTEXT_STORAGE:-file}
 export SKIP_DYNAMODB_CHECK=${SKIP_DYNAMODB_CHECK:-true}
 export LOCAL_TESTING=${LOCAL_TESTING:-true}
+# Export Anthropic configuration for worker subprocess
+export ANTHROPIC_BASE_URL ANTHROPIC_API_KEY CLAUDE_MODEL
 
 echo "🔧 Worker environment:"
 echo "   PROMPT_CONTEXT_STORAGE=$PROMPT_CONTEXT_STORAGE"
@@ -193,15 +237,16 @@ echo "   SKIP_DYNAMODB_CHECK=$SKIP_DYNAMODB_CHECK"
 echo "   LOCAL_TESTING=$LOCAL_TESTING"
 echo ""
 
-cd src && python -m investigate_worker &
+cd src && uv run python -m investigate_worker &
 WORKER_PID=$!
 sleep 2
 
+# Export environment variables for client subprocess (already exported for worker above)
+export LOCAL_TESTING SKIP_DYNAMODB_CHECK PROMPT_CONTEXT_STORAGE
+
 # Pass all arguments (including config overrides) to the client
-cd src && python -m client investigate $CLIENT_ARGS
+cd src && uv run python -m client investigate $CLIENT_ARGS
 
-kill $WORKER_PID
-kill $SERVER_PID
-
+# Cleanup will be handled by trap
 echo "✅ Investigation workflow stopped!"
 echo "Check the temp/ directory for the generated {repository-name}-arch.md files." 
