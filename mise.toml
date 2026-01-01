@@ -53,9 +53,12 @@ python = "3.12"
 temporal = "latest"
 uv = "latest"
 
+[settings]
+python.uv_venv_auto = true
+
 [env]
 _.file = [".env.local", ".env"]
-
+PYTHONPATH = "{{cwd}}"
 [tasks]
 # Get started wizard
 # Interactive setup wizard that creates .env.local from env.example
@@ -187,6 +190,11 @@ test-complete = """
     echo "🧪 Running all tests (unit + integration)..." && \
     mise exec python@3.12 -- python -m pytest tests/ -v --tb=short
 """
+
+# Test mise + uv venv integration
+# Validates that mise correctly uses the .venv created by uv
+# Use when: verifying mise/uv setup, debugging import errors, or after changing mise.toml python settings
+self-uv-test = "python scripts/test_mise_with_uv.py"
 
 # List available repositories for testing
 # Displays all configured repositories available for investigation
