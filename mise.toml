@@ -9,7 +9,7 @@
 #
 # 🔧 DEVELOPMENT SETUP:
 #   - dev-dependencies: When setting up the project or after pulling new code
-#   - dev-temporal: When starting Temporal server for local development/testing
+#   - dev-server: When starting Temporal server for local development/testing
 #   - dev-repos-update: When refreshing the repository list for analysis
 #
 # 🏃 WORKFLOW EXECUTION:
@@ -40,7 +40,7 @@
 #
 # DECISION FRAMEWORK FOR AGENTS:
 # =============================
-# 1. For LOCAL DEVELOPMENT: Use 'dev-temporal' + 'dev-worker' + 'investigate-all'/'investigate-one'
+# 1. For LOCAL DEVELOPMENT: Use 'dev-server' + 'dev-worker' + 'investigate-all'/'investigate-one'
 # 2. For PRODUCTION: Use 'investigate-public'/'investigate-debug' with proper .env
 # 3. For TESTING: Start with 'verify-config', then 'test-units', then 'test-all', then 'test-dynamodb*' as needed
 # 4. For DEBUGGING: Use '*-debug' variants and 'monitor-workflow'/'monitor-workflow-retry' for monitoring
@@ -334,7 +334,7 @@ monitor-temporal = """
         lsof -i :7233 | head -2
     else
         echo "❌ Temporal server is NOT running on port 7233" && \
-        echo "💡 Try running: mise dev-temporal"
+        echo "💡 Try running: mise dev-server"
     fi
 """
 
@@ -569,7 +569,7 @@ investigate-production-docker = "scripts/full-docker.sh $@"
 investigate-production-docker-compose = """
     echo "🐳 Starting investigation workflow with Docker Compose..." && \
     echo "Starting Temporal server..." && \
-    mise run dev-temporal & \
+    mise run dev-server & \
     SERVER_PID=$$! && \
     sleep 5 && \
     docker-compose run --rm repo-swarm-full /bin/bash -c "

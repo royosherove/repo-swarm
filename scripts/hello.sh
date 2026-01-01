@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Starting Temporal server..."
-mise run dev-temporal &
+mise run dev-server &
 SERVER_PID=$!
 sleep 5
 

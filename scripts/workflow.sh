@@ -4,7 +4,7 @@ uv sync
 
 # Start Temporal server in background
 echo "Starting Temporal server..."
-mise run dev-temporal &
+mise run dev-server &
 SERVER_PID=$!
 sleep 5
 

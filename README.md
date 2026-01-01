@@ -165,7 +165,7 @@ RepoSwarm uses a logical naming convention for all mise tasks:
 
 ### Development Tasks (`dev-*`)
 ```bash
-mise dev-temporal          # Start Temporal server
+mise dev-server          # Start Temporal server
 mise dev-dependencies      # Install Python dependencies
 mise dev-worker           # Start Temporal worker
 mise dev-client           # Run workflow client
@@ -287,7 +287,7 @@ For production deployments, you need to deploy Temporal workers that can run on 
 
 ```bash
 # Start Temporal server (local development)
-mise dev-temporal
+mise dev-server
 
 # Run worker in background
 mise dev-worker &
@@ -381,7 +381,7 @@ Cache invalidation happens when:
 mise monitor-temporal
 
 # Start Temporal server if needed
-mise dev-temporal
+mise dev-server
 ```
 
 **Claude API Errors**
@@ -422,7 +422,7 @@ mise cleanup-temp && mise dev-dependencies
 ```bash
 # Set up development environment
 mise dev-dependencies
-mise dev-temporal
+mise dev-server
 
 # Run tests before committing
 mise test-all
