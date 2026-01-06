@@ -221,7 +221,7 @@ mise test-integration
 ## Related Projects
 
 - 🏗️ [**repo-swarm-sample-results-hub**](https://github.com/royosherove/repo-swarm-sample-results-hub) - The centralized repository where generated `.arch.md` files are stored and queried
-- 📝 [Analysis prompts](src/prompts/shared/) - The AI prompts used to understand different types of codebases
+- 📝 [Analysis prompts](prompts/shared/) - The AI prompts used to understand different types of codebases
 
 ## Understanding the Codebase
 
