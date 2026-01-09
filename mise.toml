@@ -489,7 +489,7 @@ verify-config = """
     if [ -f .env.local ]; then
         echo "📂 Loading configuration from .env.local..." && \
         set -a && \
-        source .env.local && \
+        source ./.env.local && \
         set +a && \
         echo "✅ Loaded .env.local"
     else
