@@ -50,7 +50,7 @@
 
 [tools]
 python = "3.12"
-temporal = "latest"
+"aqua:temporalio/cli" = "latest"
 uv = "latest"
 
 [settings]
