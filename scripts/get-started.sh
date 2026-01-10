@@ -35,7 +35,7 @@ update_env_var() {
     local var_value="$2"
     # Escape special characters for sed
     escaped_value=$(printf '%s\n' "$var_value" | sed 's/[[\.*^$()+?{|]/\\&/g')
-    sed -i '' "s|^$var_name=.*|$var_name=$escaped_value|" .env.local
+    sed -i'' "s|^$var_name=.*|$var_name=$escaped_value|" .env.local
 }
 
 echo "🤖 Claude API Configuration"
@@ -147,11 +147,11 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 
     if [ -n "$aws_key_id" ] && [ -n "$aws_secret_key" ]; then
         # Uncomment and set AWS settings
-        sed -i '' "s|^# AWS_ACCESS_KEY_ID=.*|AWS_ACCESS_KEY_ID=$aws_key_id|" .env.local
-        sed -i '' "s|^# AWS_SECRET_ACCESS_KEY=.*|AWS_SECRET_ACCESS_KEY=$aws_secret_key|" .env.local
-        sed -i '' "s|^# AWS_REGION=.*|AWS_REGION=$aws_region|" .env.local
+        sed -i'' "s|^# AWS_ACCESS_KEY_ID=.*|AWS_ACCESS_KEY_ID=$aws_key_id|" .env.local
+        sed -i'' "s|^# AWS_SECRET_ACCESS_KEY=.*|AWS_SECRET_ACCESS_KEY=$aws_secret_key|" .env.local
+        sed -i'' "s|^# AWS_REGION=.*|AWS_REGION=$aws_region|" .env.local
         if [ -n "$dynamodb_endpoint" ]; then
-            sed -i '' "s|^# DYNAMODB_ENDPOINT_URL=.*|DYNAMODB_ENDPOINT_URL=$dynamodb_endpoint|" .env.local
+            sed -i'' "s|^# DYNAMODB_ENDPOINT_URL=.*|DYNAMODB_ENDPOINT_URL=$dynamodb_endpoint|" .env.local
         fi
         echo "✅ AWS configuration set"
     else
